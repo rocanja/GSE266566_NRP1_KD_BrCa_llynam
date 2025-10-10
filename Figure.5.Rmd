@@ -1,0 +1,421 @@
+---
+title: "Figure.5 SDATA-24-03470"
+subtitle: "per model MDS plots"
+---
+
+```{r include=FALSE}
+
+library(edgeR)
+library(ggplot2)
+library(ggrepel)
+library(cowplot)
+#
+level.order.treat<-c("siNT","siNRP1.3","siNRP1.5","shNT","shNRP1.3","shNRP1.5") #custom order
+#group.colors.treat<-c("darkorange","#E41A1C","purple","black","#0000FF","green")
+group.colors.treat<-colorspace::desaturate(c("darkorange","#E41A1C","purple","black","#0000FF","green"),amount=0.15) #muted colors
+scales::show_col(group.colors.treat)
+#
+level.order.line<-c("SUM159","MDAMB231","HS578T") #custom order
+group.colors.line<-c("#008000","#0000FF", "#E41A1C")
+
+```
+
+# Genes 
+```{r Genes, include=FALSE}
+
+load("NRP1.v48-Ensembl.114-genes_2025-08-08.Rdata")
+y<-yH
+#
+meta.data$Treat<-factor(meta.data$Treat, levels=level.order.treat)
+sample.colors.treat<-group.colors.treat[as.numeric(meta.data$Treat)]
+#
+meta.data$Line<-factor(meta.data$Line, levels=level.order.line)
+sample.colors.line<-group.colors.line[as.numeric(meta.data$Line)]
+#
+#
+### SUM159
+sum159<-grep("SUM159",colnames(y$counts))
+mds12S<-plotMDS(y[!not.detected,sum159], dim.plot = c(1,2), plot=F)
+#plotMDS(mds12)
+mds34S<-plotMDS(y[!not.detected,sum159], dim.plot = c(3,4), plot=F)
+#plotMDS(mds34)
+mds.gS<-data.frame(Dim.1=mds12S$x, Dim.2=mds12S$y, Dim.3=mds34S$x, Dim.4=mds34S$y)
+#
+dim1.label.S<-paste0("Dim.1 (", round(mds12S$var.explained[1]*100,1),"%)")
+dim2.label.S<-paste0("Dim.2 (", round(mds12S$var.explained[2]*100,1),"%)")
+dim3.label.S<-paste0("Dim.3 (", round(mds34S$var.explained[3]*100,1),"%)")
+dim4.label.S<-paste0("Dim.4 (", round(mds34S$var.explained[4]*100,1),"%)")  
+#
+#
+### MDAMB231
+mdamb231<-grep("MDAMB231",colnames(y$counts))
+mds12M<-plotMDS(y[!not.detected,mdamb231], dim.plot = c(1,2), plot=F)
+#plotMDS(mds12)
+mds34M<-plotMDS(y[!not.detected,mdamb231], dim.plot = c(3,4), plot=F)
+#plotMDS(mds34)
+mds.gM<-data.frame(Dim.1=mds12M$x, Dim.2=mds12M$y, Dim.3=mds34M$x, Dim.4=mds34M$y)
+#
+dim1.label.M<-paste0("Dim.1 (", round(mds12M$var.explained[1]*100,1),"%)")
+dim2.label.M<-paste0("Dim.2 (", round(mds12M$var.explained[2]*100,1),"%)")
+dim3.label.M<-paste0("Dim.3 (", round(mds34M$var.explained[3]*100,1),"%)")
+dim4.label.M<-paste0("Dim.4 (", round(mds34M$var.explained[4]*100,1),"%)")  
+#
+#
+### HS578T
+hs578t<-grep("HS578T",colnames(y$counts))
+mds12H<-plotMDS(y[!not.detected,hs578t], dim.plot = c(1,2), plot=F)
+#plotMDS(mds12)
+mds34H<-plotMDS(y[!not.detected,hs578t], dim.plot = c(3,4), plot=F)
+#plotMDS(mds34)
+mds.gH<-data.frame(Dim.1=mds12H$x, Dim.2=mds12H$y, Dim.3=mds34H$x, Dim.4=mds34H$y)
+#
+dim1.label.H<-paste0("Dim.1 (", round(mds12H$var.explained[1]*100,1),"%)")
+dim2.label.H<-paste0("Dim.2 (", round(mds12H$var.explained[2]*100,1),"%)")
+dim3.label.H<-paste0("Dim.3 (", round(mds34H$var.explained[3]*100,1),"%)")
+dim4.label.H<-paste0("Dim.4 (", round(mds34H$var.explained[4]*100,1),"%)")  
+
+```
+
+
+```{r}
+
+#dev.new(width=5, height=5, noRStudioGD=T)
+# 
+### SUM159
+Sa<-ggplot(mds.gS,aes(x=Dim.1, y=Dim.2, color=meta.data$Treat[sum159]))+ 
+  geom_vline(xintercept=0, linetype='dashed')+
+  geom_hline(yintercept=0, linetype='dashed')+
+  geom_point(size=6, alpha=1)+
+  scale_colour_manual(values=group.colors.treat)+
+  theme_classic()+
+  theme(panel.border = element_rect(color = "black", fill = NA))+
+  theme(plot.title = element_text(face = "bold"))+
+  theme(legend.position="none")+
+  geom_text(aes(label=meta.data$Repeat[sum159]),size=3, color='white')+
+  labs(title='SUM159', x=dim1.label.S, y=dim2.label.S)
+Sa
+#
+Sb<-ggplot(mds.gS,aes(x=Dim.3, y=Dim.4, color=meta.data$Treat[sum159]))+ 
+  geom_vline(xintercept=0, linetype='dashed')+
+  geom_hline(yintercept=0, linetype='dashed')+
+  geom_point(size=6, alpha=1)+
+  scale_colour_manual(values=group.colors.treat)+
+  theme_classic()+
+  theme(panel.border = element_rect(color = "black", fill = NA))+
+  theme(legend.position="none")+
+  geom_text(aes(label=meta.data$Repeat[sum159]),size=3, color='white')+
+  labs(title='', x=dim3.label.S, y=dim4.label.S)
+Sb
+#
+#
+# 
+### MDAMB231
+Ma<-ggplot(mds.gM,aes(x=Dim.1, y=Dim.2, color=meta.data$Treat[mdamb231]))+ 
+  geom_vline(xintercept=0, linetype='dashed')+
+  geom_hline(yintercept=0, linetype='dashed')+
+  geom_point(size=6, alpha=1)+
+  scale_colour_manual(values=group.colors.treat)+
+  theme_classic()+
+  theme(panel.border = element_rect(color = "black", fill = NA))+
+  theme(plot.title = element_text(face = "bold"))+
+  theme(legend.position="none")+
+  geom_text(aes(label=meta.data$Repeat[mdamb231]),size=3, color='white')+
+  labs(title='MDAMB231', x=dim1.label.M, y=dim2.label.M)
+Ma
+#
+Mb<-ggplot(mds.gM,aes(x=Dim.3, y=Dim.4, color=meta.data$Treat[mdamb231]))+ 
+  geom_vline(xintercept=0, linetype='dashed')+
+  geom_hline(yintercept=0, linetype='dashed')+
+  geom_point(size=6, alpha=1)+
+  scale_colour_manual(values=group.colors.treat)+
+  theme_classic()+
+  theme(panel.border = element_rect(color = "black", fill = NA))+
+  theme(legend.position="none")+
+  geom_text(aes(label=meta.data$Repeat[mdamb231]),size=3, color='white')+
+  labs(title='', x=dim3.label.M, y=dim4.label.M)
+Mb
+#
+#
+# 
+### HS578T
+Ha<-ggplot(mds.gH,aes(x=Dim.1, y=Dim.2, color=meta.data$Treat[hs578t]))+ 
+  geom_vline(xintercept=0, linetype='dashed')+
+  geom_hline(yintercept=0, linetype='dashed')+
+  geom_point(size=6, alpha=1)+
+  scale_colour_manual(values=group.colors.treat)+
+  theme_classic()+
+  theme(panel.border = element_rect(color = "black", fill = NA))+
+  theme(plot.title = element_text(face = "bold"))+
+  #
+  theme(legend.title=element_blank())+
+  guides(color = guide_legend(override.aes = list(size = 3)))+
+  #
+  geom_text(aes(label=meta.data$Repeat[hs578t]),size=3, color='white')+
+  labs(title='HS578T', x=dim1.label.H, y=dim2.label.H)
+Ha
+#
+Hb<-ggplot(mds.gH,aes(x=Dim.3, y=Dim.4, color=meta.data$Treat[hs578t]))+ 
+  geom_vline(xintercept=0, linetype='dashed')+
+  geom_hline(yintercept=0, linetype='dashed')+
+  geom_point(size=6, alpha=1)+
+  scale_colour_manual(values=group.colors.treat)+
+  theme_classic()+
+  theme(panel.border = element_rect(color = "black", fill = NA))+
+  #
+  theme(legend.title=element_blank(),legend.text = element_text(color = "transparent"))+
+  guides(color = guide_legend(override.aes = list(alpha = 0)))+
+  #
+  geom_text(aes(label=meta.data$Repeat[hs578t]),size=3, color='white')+
+  labs(title='', x=dim3.label.H, y=dim4.label.H)
+Hb
+
+```
+
+# TranScripts 
+```{r Transcripts, include=FALSE}
+
+load("NRP1.v48-Ensembl.114-transcripts_2025-08-08.Rdata")
+y<-yH
+#
+meta.data$Treat<-factor(meta.data$Treat, levels=level.order.treat)
+sample.colors.treat<-group.colors.treat[as.numeric(meta.data$Treat)]
+#
+meta.data$Line<-factor(meta.data$Line, levels=level.order.line)
+sample.colors.line<-group.colors.line[as.numeric(meta.data$Line)]
+#
+#
+#
+### SUM159
+sum159<-grep("SUM159",colnames(y$counts))
+mds12S<-plotMDS(y[!not.detected,sum159], dim.plot = c(1,2), plot=F)
+#plotMDS(mds12)
+mds34S<-plotMDS(y[!not.detected,sum159], dim.plot = c(3,4), plot=F)
+#plotMDS(mds34)
+mds.tS<-data.frame(Dim.1=mds12S$x, Dim.2=mds12S$y, Dim.3=mds34S$x, Dim.4=mds34S$y)
+#
+dim1.label.S<-paste0("Dim.1 (", round(mds12S$var.explained[1]*100,1),"%)")
+dim2.label.S<-paste0("Dim.2 (", round(mds12S$var.explained[2]*100,1),"%)")
+dim3.label.S<-paste0("Dim.3 (", round(mds34S$var.explained[3]*100,1),"%)")
+dim4.label.S<-paste0("Dim.4 (", round(mds34S$var.explained[4]*100,1),"%)")  
+#
+#
+### MDAMB231
+mdamb231<-grep("MDAMB231",colnames(y$counts))
+mds12M<-plotMDS(y[!not.detected,mdamb231], dim.plot = c(1,2), plot=F)
+#plotMDS(mds12)
+mds34M<-plotMDS(y[!not.detected,mdamb231], dim.plot = c(3,4), plot=F)
+#plotMDS(mds34)
+mds.tM<-data.frame(Dim.1=mds12M$x, Dim.2=mds12M$y, Dim.3=mds34M$x, Dim.4=mds34M$y)
+#
+dim1.label.M<-paste0("Dim.1 (", round(mds12M$var.explained[1]*100,1),"%)")
+dim2.label.M<-paste0("Dim.2 (", round(mds12M$var.explained[2]*100,1),"%)")
+dim3.label.M<-paste0("Dim.3 (", round(mds34M$var.explained[3]*100,1),"%)")
+dim4.label.M<-paste0("Dim.4 (", round(mds34M$var.explained[4]*100,1),"%)")  
+#
+#
+### HS578T
+hs578t<-grep("HS578T",colnames(y$counts))
+mds12H<-plotMDS(y[!not.detected,hs578t], dim.plot = c(1,2), plot=F)
+#plotMDS(mds12)
+mds34H<-plotMDS(y[!not.detected,hs578t], dim.plot = c(3,4), plot=F)
+#plotMDS(mds34)
+mds.tH<-data.frame(Dim.1=mds12H$x, Dim.2=mds12H$y, Dim.3=mds34H$x, Dim.4=mds34H$y)
+#
+dim1.label.H<-paste0("Dim.1 (", round(mds12H$var.explained[1]*100,1),"%)")
+dim2.label.H<-paste0("Dim.2 (", round(mds12H$var.explained[2]*100,1),"%)")
+dim3.label.H<-paste0("Dim.3 (", round(mds34H$var.explained[3]*100,1),"%)")
+dim4.label.H<-paste0("Dim.4 (", round(mds34H$var.explained[4]*100,1),"%)")  
+
+```
+
+
+```{r}
+
+#dev.new(width=5, height=5, noRStudioGD=T)
+# 
+### SUM159
+Sc<-ggplot(mds.tS,aes(x=Dim.1, y=Dim.2, color=meta.data$Treat[sum159]))+ 
+  geom_vline(xintercept=0, linetype='dashed')+
+  geom_hline(yintercept=0, linetype='dashed')+
+  geom_point(size=6, alpha=1)+
+  scale_colour_manual(values=group.colors.treat)+
+  theme_classic()+
+  theme(panel.border = element_rect(color = "black", fill = NA))+
+  theme(plot.title = element_text(face = "bold"))+
+  theme(legend.position="none")+
+  geom_text(aes(label=meta.data$Repeat[sum159]),size=3, color='white')+
+  labs(title='SUM159', x=dim1.label.S, y=dim2.label.S)
+Sc
+#
+Sd<-ggplot(mds.tS,aes(x=Dim.3, y=Dim.4, color=meta.data$Treat[sum159]))+ 
+  geom_vline(xintercept=0, linetype='dashed')+
+  geom_hline(yintercept=0, linetype='dashed')+
+  geom_point(size=6, alpha=1)+
+  scale_colour_manual(values=group.colors.treat)+
+  theme_classic()+
+  theme(panel.border = element_rect(color = "black", fill = NA))+
+  theme(legend.position="none")+
+  geom_text(aes(label=meta.data$Repeat[sum159]),size=3, color='white')+
+  labs(title='', x=dim3.label.S, y=dim4.label.S)
+Sd
+#
+#
+# 
+### MDAMB231
+Mc<-ggplot(mds.tM,aes(x=Dim.1, y=Dim.2, color=meta.data$Treat[mdamb231]))+ 
+  geom_vline(xintercept=0, linetype='dashed')+
+  geom_hline(yintercept=0, linetype='dashed')+
+  geom_point(size=6, alpha=1)+
+  scale_colour_manual(values=group.colors.treat)+
+  theme_classic()+
+  theme(panel.border = element_rect(color = "black", fill = NA))+
+  theme(plot.title = element_text(face = "bold"))+
+  theme(legend.position="none")+
+  geom_text(aes(label=meta.data$Repeat[mdamb231]),size=3, color='white')+
+  labs(title='MDAMB231', x=dim1.label.M, y=dim2.label.M)
+Mc
+#
+Md<-ggplot(mds.tM,aes(x=Dim.3, y=Dim.4, color=meta.data$Treat[mdamb231]))+ 
+  geom_vline(xintercept=0, linetype='dashed')+
+  geom_hline(yintercept=0, linetype='dashed')+
+  geom_point(size=6, alpha=1)+
+  scale_colour_manual(values=group.colors.treat)+
+  theme_classic()+
+  theme(panel.border = element_rect(color = "black", fill = NA))+
+  theme(legend.position="none")+
+  geom_text(aes(label=meta.data$Repeat[mdamb231]),size=3, color='white')+
+  labs(title='', x=dim3.label.M, y=dim4.label.M)
+Md
+#
+#
+# 
+### HS578T
+Hc<-ggplot(mds.tH,aes(x=Dim.1, y=Dim.2, color=meta.data$Treat[hs578t]))+ 
+  geom_vline(xintercept=0, linetype='dashed')+
+  geom_hline(yintercept=0, linetype='dashed')+
+  geom_point(size=6, alpha=1)+
+  scale_colour_manual(values=group.colors.treat)+
+  theme_classic()+
+  theme(panel.border = element_rect(color = "black", fill = NA))+
+  theme(plot.title = element_text(face = "bold"))+
+  #
+  theme(legend.title=element_blank())+
+  guides(color = guide_legend(override.aes = list(size = 3)))+
+  #
+  geom_text(aes(label=meta.data$Repeat[hs578t]),size=3, color='white')+
+  labs(title='HS578T', x=dim1.label.H, y=dim2.label.H)
+Hc
+#
+Hd<-ggplot(mds.tH,aes(x=Dim.3, y=Dim.4, color=meta.data$Treat[hs578t]))+ 
+  geom_vline(xintercept=0, linetype='dashed')+
+  geom_hline(yintercept=0, linetype='dashed')+
+  geom_point(size=6, alpha=1)+
+  scale_colour_manual(values=group.colors.treat)+
+  theme_classic()+
+  theme(panel.border = element_rect(color = "black", fill = NA))+
+  #
+  theme(legend.title=element_blank(),legend.text = element_text(color = "transparent"))+
+  guides(color = guide_legend(override.aes = list(alpha = 0)))+
+  #
+  geom_text(aes(label=meta.data$Repeat[hs578t]),size=3, color='white')+
+  labs(title='', x=dim3.label.H, y=dim4.label.H)
+Hd
+
+```
+
+
+# Combined
+```{r}
+
+### A4 page in inches: 8.3 x 11.7 inches --> width=15,height=21.14
+dev.new(width=15, height=20, noRStudioGD = T, rescale='fixed')
+#
+# plot<-plot_grid(NULL,NULL,NULL, #small space at the top for extra labels
+#                 Sa,Ma,Ha, #keep the cell line order consistent with other plots
+#                 Sb,Mb,Hb,
+#                 Sc,Mc,Hc,
+#                 Sd,Md,Hd,
+#                 ncol=3, rel_widths=c(1,1,1.3), rel_heights=c(0.1,1,1,1,1), 
+#                 align="h",axis="tb", 
+#                 labels=c('','','','a','b','c','','','','d','e','f'))
+# plot
+#  
+#
+plotx<-ggdraw(plot)+
+       draw_label("Cell Lines", x=0.47, y=0.99, size=16, fontface="bold")+
+       draw_grob(grid::linesGrob(x=c(0.06,0.89),y=c(0.98,0.98)))+
+       #
+       draw_label("Gene Level", x=0.945, y=0.74, size=16, angle=-90, fontface="bold")+
+       draw_grob(grid::linesGrob(x=c(0.925,0.925),y=c(0.54,0.94)))+
+       #
+       draw_label("Transcript Level", x=0.945, y=0.25, size=16, angle=-90, fontface="bold")+
+       draw_grob(grid::linesGrob(x=c(0.925,0.925),y=c(0.05,0.45)))
+plotx
+#
+#
+#cowplot::save_plot("Figure5.pdf", plot = plot, base_width = 15, base_height = 20) #omits ggdraw objects
+pdf(file="Figure5.pdf", width=15, height=20) #this works!
+plotx
+dev.off()
+
+```
+
+
+<br>
+
+***  
+
+# R.session Info
+
+
+```{r Rsession, echo=FALSE}
+
+sessionInfo() #record the R and package versions used
+##############################
+# R version 4.2.3 (2023-03-15 ucrt)
+# Platform: x86_64-w64-mingw32/x64 (64-bit)
+# Running under: Windows 10 x64 (build 19044)
+# 
+# Matrix products: default
+# 
+# locale:
+# [1] LC_COLLATE=English_Australia.utf8  LC_CTYPE=English_Australia.utf8   
+# [3] LC_MONETARY=English_Australia.utf8 LC_NUMERIC=C                      
+# [5] LC_TIME=English_Australia.utf8    
+# 
+# attached base packages:
+# [1] stats     graphics  grDevices utils     datasets  methods   base     
+# 
+# other attached packages:
+# [1] cowplot_1.1.1  ggrepel_0.9.3  ggplot2_3.4.2  reshape2_1.4.4 edgeR_3.40.2   limma_3.54.2  
+# 
+# loaded via a namespace (and not attached):
+#  [1] Rcpp_1.0.10                 locfit_1.5-9.7              lattice_0.20-45            
+#  [4] Rsamtools_2.14.0            Biostrings_2.66.0           digest_0.6.31              
+#  [7] R6_2.5.1                    GenomeInfoDb_1.34.9         plyr_1.8.8                 
+# [10] stats4_4.2.3                Polychrome_1.5.1            evaluate_0.21              
+# [13] pillar_1.11.0               zlibbioc_1.44.0             rlang_1.1.3                
+# [16] rstudioapi_0.14             S4Vectors_0.36.2            Matrix_1.6-5               
+# [19] rmarkdown_2.22              BiocParallel_1.32.5         stringr_1.5.0              
+# [22] RCurl_1.98-1.12             DelayedArray_0.23.2         compiler_4.2.3             
+# [25] rtracklayer_1.58.0          xfun_0.39                   pkgconfig_2.0.3            
+# [28] BiocGenerics_0.44.0         htmltools_0.5.4             tidyselect_1.2.0           
+# [31] SummarizedExperiment_1.28.0 tibble_3.2.1                GenomeInfoDbData_1.2.9     
+# [34] IRanges_2.32.0              codetools_0.2-19            matrixStats_1.0.0          
+# [37] XML_3.99-0.13               crayon_1.5.2                dplyr_1.1.2                
+# [40] withr_2.5.0                 GenomicAlignments_1.34.1    bitops_1.0-7               
+# [43] grid_4.2.3                  gtable_0.3.3                lifecycle_1.0.3            
+# [46] magrittr_2.0.3              scales_1.4.0                cli_3.6.0                  
+# [49] stringi_1.7.12              farver_2.1.1                XVector_0.38.0             
+# [52] scatterplot3d_0.3-43        generics_0.1.3              vctrs_0.6.0                
+# [55] rjson_0.2.21                restfulr_0.0.15             RColorBrewer_1.1-3         
+# [58] tools_4.2.3                 Biobase_2.58.0              glue_1.6.2                 
+# [61] MatrixGenerics_1.10.0       parallel_4.2.3              fastmap_1.1.1              
+# [64] yaml_2.3.7                  colorspace_2.1-0            GenomicRanges_1.50.2       
+# [67] knitr_1.43                  BiocIO_1.8.0               
+##############################
+
+```
+
+
+***

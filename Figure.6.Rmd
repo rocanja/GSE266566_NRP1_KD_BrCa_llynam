@@ -1,0 +1,379 @@
+---
+title: "Figure.6 SDATA-24-03470"
+subtitle: "NRP1 expression"
+---
+
+```{r include=FALSE}
+
+library(edgeR)
+library(ggplot2)
+library(ggrepel)
+library(cowplot)
+#
+level.order.treat<-c("siNT","siNRP1.3","siNRP1.5","shNT","shNRP1.3","shNRP1.5") #custom order
+#group.colors.treat<-c("darkorange","#E41A1C","purple","black","#0000FF","green")
+group.colors.treat<-colorspace::desaturate(c("darkorange","#E41A1C","purple","black","#0000FF","green"),amount=0.15) #muted colors
+scales::show_col(group.colors.treat)
+#
+level.order.line<-c("SUM159","MDAMB231","HS578T") #custom order
+group.colors.line<-c("#008000","#0000FF", "#E41A1C")
+
+```
+
+# Genes 
+```{r Genes, include=FALSE}
+
+load("NRP1.v48-Ensembl.114-genes_2025-08-08.Rdata")
+y<-yH
+#
+meta.data$Treat<-factor(meta.data$Treat, levels=level.order.treat)
+sample.colors.treat<-group.colors.treat[as.numeric(meta.data$Treat)]
+#
+meta.data$Line<-factor(meta.data$Line, levels=level.order.line)
+sample.colors.line<-group.colors.line[as.numeric(meta.data$Line)]
+
+```
+
+
+```{r}
+
+### decided to try TPMs because this is what we provide in GEO
+dim(tpms.H) #78894    52
+identical(rownames(tpms.H), y$genes$Ensembl.114.Gene.ID) #sanity check
+#
+rownames(tpms.H)<-paste(y$genes$Gene.Name,rownames(tpms.H),sep=' | ')
+#
+nrp1.tpm<-tpms.H[grep('^NRP1',rownames(tpms.H)),,drop=F]
+dim(nrp1.tpm)
+nrp1.tpm<-data.frame(t(nrp1.tpm),check.names=F)
+nrp1.label<-colnames(nrp1.tpm) #"NRP1 | ENSG00000099250.18"
+identical(rownames(nrp1.tpm), meta.data$Sample)
+nrp1.tpm<-cbind(nrp1.tpm, meta.data)
+#
+A<-ggplot(nrp1.tpm, aes(x=Treat, y=`NRP1 | ENSG00000099250.18`))+
+	geom_boxplot(lwd=0.4,fatten=2,alpha=0.2,outlier.shape=NA)+ 
+	geom_point(aes(color=Treat), position=position_jitter(seed=1, width=0.25, height=0.0), size=2.5, alpha=0.7)+ #size=4
+  #geom_text(aes(label=Repeat), position=position_jitter(seed=1, width=0.25, height=0.0), col='white', size=2)+ #inside labels
+  geom_text_repel(aes(label=Repeat), position=position_jitter(seed=1, width=0.25, height=0.0), size=2.5, force=0.3)+
+  scale_color_manual(values=group.colors.treat)+
+  facet_wrap(~Line)+
+  theme_bw()+
+  theme(legend.position='none')+
+  theme(axis.text.x=element_text(angle=30, hjust=1))+
+  labs(title=paste(nrp1.label,'gene expression'),x=NULL,y='TPM')
+A
+
+```
+
+
+```{r}
+
+### trying out FPKM because TPM gives a weird result for MDA si3
+fpkms<-edgeR.output.H[, grep("fpkm",colnames(edgeR.output.H))]
+colnames(fpkms)<-gsub("fpkm.","",colnames(fpkms))
+dim(fpkms) #78894    52
+identical(rownames(fpkms), y$genes$Ensembl.114.Gene.ID) #sanity check
+#
+rownames(fpkms)<-paste(y$genes$Gene.Name,rownames(fpkms),sep=' | ')
+#
+nrp1.fpkm<-fpkms[grep('^NRP1',rownames(fpkms)),,drop=F]
+dim(nrp1.fpkm)
+nrp1.fpkm<-data.frame(t(nrp1.fpkm),check.names=F)
+nrp1.label<-colnames(nrp1.fpkm) #"NRP1 | ENSG00000099250.18"
+identical(rownames(nrp1.fpkm), meta.data$Sample)
+nrp1.fpkm<-cbind(nrp1.fpkm, meta.data)
+#
+AA<-ggplot(nrp1.fpkm, aes(x=Treat, y=`NRP1 | ENSG00000099250.18`))+
+	geom_boxplot(lwd=0.4,fatten=2,alpha=0.2,outlier.shape=NA)+ 
+	geom_point(aes(color=Treat), position=position_jitter(seed=1, width=0.25, height=0.0), size=2.5, alpha=0.7)+ #size=4
+  #geom_text(aes(label=Repeat), position=position_jitter(seed=1, width=0.25, height=0.0), col='white', size=2)+ #inside labels
+  geom_text_repel(aes(label=Repeat), position=position_jitter(seed=1, width=0.25, height=0.0), size=2.5, force=0.3)+
+  scale_color_manual(values=group.colors.treat)+
+  facet_wrap(~Line)+
+  theme_bw()+
+  theme(legend.position='none')+
+  theme(axis.text.x=element_text(angle=30, hjust=1))+
+  labs(title=paste(nrp1.label,'gene expression'),x=NULL,y='FPKM')
+AA
+
+```
+
+```{r}
+
+### trying out CPM because TPM gives a weird result for MDA si3
+cpms<-edgeR.output.H[, grep("cpm",colnames(edgeR.output.H))]
+colnames(cpms)<-gsub("cpm.","",colnames(cpms))
+dim(cpms) #78894    52
+identical(rownames(cpms), y$genes$Ensembl.114.Gene.ID) #sanity check
+#
+rownames(cpms)<-paste(y$genes$Gene.Name,rownames(cpms),sep=' | ')
+#
+nrp1.cpm<-cpms[grep('^NRP1',rownames(cpms)),,drop=F]
+dim(nrp1.cpm)
+nrp1.cpm<-data.frame(t(nrp1.cpm),check.names=F)
+nrp1.label<-colnames(nrp1.cpm) #"NRP1 | ENSG00000099250.18"
+identical(rownames(nrp1.cpm), meta.data$Sample)
+nrp1.cpm<-cbind(nrp1.cpm, meta.data)
+#
+AAA<-ggplot(nrp1.cpm, aes(x=Treat, y=`NRP1 | ENSG00000099250.18`))+
+	geom_boxplot(lwd=0.4,fatten=2,alpha=0.2,outlier.shape=NA)+ 
+	geom_point(aes(color=Treat), position=position_jitter(seed=1, width=0.25, height=0.0), size=2.5, alpha=0.7)+ #size=4
+  #geom_text(aes(label=Repeat), position=position_jitter(seed=1, width=0.25, height=0.0), col='white', size=2)+ #inside labels
+  geom_text_repel(aes(label=Repeat), position=position_jitter(seed=1, width=0.25, height=0.0), size=2.5, force=0.3)+
+  scale_color_manual(values=group.colors.treat)+
+  facet_wrap(~Line)+
+  theme_bw()+
+  theme(legend.position='none')+
+  theme(axis.text.x=element_text(angle=30, hjust=1))+
+  labs(title=paste(nrp1.label,'gene expression'),x=NULL,y='CPM')
+AAA
+
+```
+
+```{r}
+rm(list=setdiff(ls(),c("nrp1.tpm","A","AA","nrp1.label","mygtf","level.order.treat","level.order.line","group.colors.treat","group.colors.line"))) #cleanup
+```
+
+
+# Transcripts 
+```{r Transcripts, include=FALSE}
+
+load("NRP1.v48-Ensembl.114-transcripts_2025-08-08.Rdata")
+y<-yH
+#
+meta.data$Treat<-factor(meta.data$Treat, levels=level.order.treat)
+sample.colors.treat<-group.colors.treat[as.numeric(meta.data$Treat)]
+#
+meta.data$Line<-factor(meta.data$Line, levels=level.order.line)
+sample.colors.line<-group.colors.line[as.numeric(meta.data$Line)]
+
+```
+
+
+```{r}
+
+### isoform percentages - from RSEM
+dim(isoPcts.H) #387954     52
+identical(rownames(isoPcts.H), y$genes$Ensembl.114.Transcript.ID) #sanity check
+#
+rownames(isoPcts.H)<-paste(y$genes$Transcript.Name,rownames(isoPcts.H),y$genes$Transcript.Type,sep=' | ')
+#
+nrp1.isopct<-isoPcts.H[grep('^NRP1',rownames(isoPcts.H)),,drop=F]
+dim(nrp1.isopct) #14
+colSums(nrp1.isopct) #sanity check
+nrp1.isopct<-data.frame(t(nrp1.isopct),check.names=F)
+identical(rownames(nrp1.isopct), meta.data$Sample) #sanity check
+nrp1.isopct$Type<-meta.data$Type
+nrp1.isopct<-aggregate(.~Type,data=nrp1.isopct, mean) #averages by sample type
+rowSums(nrp1.isopct[,-1]) #sanity check
+nrp1.isopct<-reshape2::melt(nrp1.isopct) 
+dim(nrp1.isopct) #252   3
+#
+nrp1.isopct$Line<-sub("\\..*","",nrp1.isopct$Type)
+nrp1.isopct$Line<-factor(nrp1.isopct$Line, levels=level.order.line)
+nrp1.isopct$Treat<-sub("^[^.]*.","",nrp1.isopct$Type)
+nrp1.isopct$Treat<-factor(nrp1.isopct$Treat, levels=level.order.treat)
+dim(nrp1.isopct) #252   5
+head(nrp1.isopct)
+#
+p36<-as.vector(Polychrome::palette36.colors(36)) #color scheme
+named.p36<-setNames(p36[1:14], levels((nrp1.isopct$variable))) #named colors are better
+named.p36
+#
+B<-ggplot(nrp1.isopct, aes(x=Treat, y=value, fill=variable))+
+	geom_bar(stat="identity",position = "stack")+
+  scale_fill_manual(values=named.p36)+
+  facet_wrap(~Line)+
+  theme_bw()+
+  theme(legend.title=element_blank())+
+  theme(axis.text.x=element_text(angle=30, hjust=1))+
+  labs(title='NRP1 transcript variant proportions',x=NULL,y='isoform.percentage')
+B
+
+```
+
+
+```{r}
+rm(list=setdiff(ls(),c("nrp1.tpm","A","AA","nrp1.label","nrp1.isopct","B","named.p36","mygtf","level.order.treat","level.order.line","group.colors.treat","group.colors.line"))) #cleanup
+gc()
+#nrp1.label<-"NRP1 | ENSG00000099250.18"
+```
+
+
+# Gene Layout
+```{r}
+
+library(transPlotR)
+library(dplyr)
+library(rtracklayer)
+#
+#trancriptVis(gtfFile = gtf, gene = 'Nanog') #with test data
+#dim(gtf)  "data.frame" / 1987   31
+#
+### direct loading of gtf file in trancriptVis didn't work
+### load file with rtracklayer first
+mygtf<-rtracklayer::import('U:/Research/Projects/ihbi/apcrcq/apcrcq_general/bioinformatics/RefDB/Human_Gencode_48/gencode.v48.primary_assembly.annotation.gtf.gz')
+class(mygtf) #"GRanges"
+mygtf<-as.data.frame(mygtf) #"data.frame" 4119244      27
+colnames(mygtf)
+#
+#
+### hacky customisations
+mygtf<-mygtf[mygtf$gene_name=='NRP1',] #334  27 - subset only NRP1 entries from the data frame to make it smaller
+dim(mygtf)
+mygtf$transcript_id<-paste(mygtf$transcript_name, mygtf$transcript_id, sep=' | ') #custom label to include tx name and id
+named.p36.sorted<-named.p36[c(1,8,6,7,4,3,5,2,12,14,13,11,10,9)] #to match the colors / named color vector doesn't work here
+#
+#
+C<-trancriptVis(gtfFile = mygtf, gene = "NRP1", #now it works
+             exonWidth = 0.4,
+             exonFill = 'grey10',
+             arrowCol = 'grey10',
+             newStyleArrow = T, #uncluttered arrows
+             addNormalArrow = F,
+             absSpecArrowLen = T, #uncluttered arrows
+             speArrowRelHigh = 1.5, #default is 2
+             speArrowCol = 'grey80',
+             relTextDist = 0.45,
+             textLabel = 'transcript_id',
+             textLabelSize = 3.5,
+             textLabelColor = named.p36.sorted)+ #named color vector doesn't work
+             #
+             scale_x_continuous(expand = expansion(mult=c(0.05,0.01)))+ #default is 0.05
+             #
+             ### RNAi mapping sites ###
+             geom_vline(xintercept=c(33185638,33263779,33185659,33263779), col=c('grey70'), linetype='dotted', linewidth=0.2)+
+             #
+             ## shape="\U25BC" for down arrow fails upon pdf conversion
+             geom_point(aes(x=33185638, y=16.0), size=4, shape=25, fill=group.colors.treat[2], col='white')+ # siNRP1#3
+             geom_point(aes(x=33263779, y=16.0), size=4, shape=25, fill=group.colors.treat[3], col='white')+ # siNRP1#5
+             geom_point(aes(x=33185659, y=15.4), size=4, shape=25, fill=group.colors.treat[5], col='white')+ # shNRP1#3
+             geom_point(aes(x=33263779, y=15.4), size=4, shape=25, fill=group.colors.treat[6], col='white')+ # shNRP1#5
+             #
+             annotate("text", x=33185638+2000, y=16.0, label="siNRP1 #3 (5’-TAACCACATTTCACAAGAA-3’) ... includes NRP1-209", color=group.colors.treat[2], size=3.5, hjust=0) +
+             annotate("text", x=33263779+2000, y=16.0, label="siNRP1 #5 (5’-CAGCCTTGAATGCACTTAT-3’) ... excludes NRP1-213, includes NRP1-207", color=group.colors.treat[3], size=3.5, hjust=0) +
+             annotate("text", x=33185659+2000, y=15.4, label="shNRP1 #3 (5ʹ-AATACTAATGTCATCCACAGC-3ʹ) ... excludes NRP1-209", color=group.colors.treat[5], size=3.5, hjust=0) +
+             annotate("text", x=33263779+2000, y=15.4, label="shNRP1 #5 (5’-CAGCCTTGAATGCACTTAT-3’) ... excludes NRP1-213, includes NRP1-207", color=group.colors.treat[6], size=3.5, hjust=0) +
+             #
+             ### Primer mapping sites ###
+             geom_vline(xintercept=c(33330723,33180345), col=c('grey70'), linetype='dotted', linewidth=0.2)+
+             #
+             geom_point(aes(x=33263862, y=2.5), size=2, shape=19, col='black')+ #total.NRP1.Fwd
+             geom_point(aes(x=33330723, y=2.5), size=2, shape=19, col='black')+ #total.NRP1.Rev  
+             geom_segment(x=33263862, y=2.5, xend=33330723, yend=2.5, linetype = "dashed")+
+             annotate("text", x=33297293, y=1.5, size=3.5, label="'total' NRP1 primers\n... exclude NRP1-213, exclude NRP1-207")+
+             #
+             geom_point(aes(x=33180345, y=8), size=2, shape=19, col='black')+ #tm.NRP1.Fwd
+             geom_point(aes(x=33185716, y=8), size=2, shape=19, col='black')+ #tm.NRP1.Rev  
+             geom_segment(x=33180345, y=8, xend=33185716, yend=8, linetype = "dashed")+
+             annotate("text", x=33183031, y=7, size=3.5, label="'transmembrane' NRP1 primers\n... exclude NRP1-209")+
+             #
+             #
+             theme(plot.title=element_text(size=13))+
+             labs(title=paste(nrp1.label,'gene structure with Primer and RNAi mapping sites (GRCh38 / Gencode.v.48 / Ensembl.v.114 / May.2025)'),x=unique(mygtf$seqnames))
+C
+#
+### USCS genome browser ... use the Short Sequence Match track
+####################################################################
+### si/sh RNA sequencing mapping sites for GRCh38.gencode.v.48
+###
+### siNRP1#3, 5’ UAACCACAUUUCACAAGAA 3’     chr10 start 33,185,638 ... includes NRP1-209 (..3802)
+### siNRP1#5, 5’ CAGCCUUGAAUGCACUUAU 3’     chr10 start 33,263,779 ... misses NRP1-213 (..5749)
+### shNRP1#3, 5ʹ AATACTAATGTCATCCACAGC 3'   chr10 start 33,185,659 ... misses NRP1-209 (..3802)  
+### shNRP1#5, 5’ CAGCCUUGAAUGCACUUAU 3’     chr10 start 33,263,779 ... misses NRP1-213 (..5749)
+###
+### note replaced the Us by Ts in the plot to be consistent
+####################################################################
+### qRT-PCR primer sequences
+###
+### Total NRP1 (FWD 5’ AGGACAGAGACTGCAA|GTATGAC 3’, REV 5’ AACATTCAGGACCTCTCTTGA 3’) - 210 bp - chr10:33263862-33330723 ... misses NRP1-213 (..5749) ... will also miss NRP1-207 (..4875) only partial Fwd primer match
+### Transmembrane NRP1 (FWD 5’ CGAGGGCGAAATCGGAAAAGG 3’, REV 5’ CTTCGTATCCTGGCGTGCT 3’) - 110 / 161 bp - chr10:33180345-33185716 ... misses NRP1-209 (..3802) 
+###
+####################################################################
+
+```
+
+
+
+# Combined
+```{r}
+
+### A4 page in inches: 8.3 x 11.7 inches --> width=15,height=21.14
+dev.new(width=15, height=11, noRStudioGD = T, rescale='fixed')
+#
+#
+plot<-plot_grid(plot_grid(A,B,rel_widths=c(1,1.6),labels=c('a','b')), #A is based on TPM, AA is based on FPKM
+                plot_grid(NULL,C,labels='c',rel_widths=c(0.015,1)),
+                ncol=1, rel_heights=c(1,1.3), 
+                align="h",axis="tb")
+plot
+#  
+cowplot::save_plot("Figure6.pdf", plot = plot, base_width = 15, base_height = 11)
+#
+#
+plot<-plot_grid(plot_grid(AA,B,rel_widths=c(1,1.6),labels=c('a','b')), #A is based on TPM, AA is based on FPKM
+                plot_grid(NULL,C,labels='c',rel_widths=c(0.015,1)),
+                ncol=1, rel_heights=c(1,1.3), 
+                align="h",axis="tb")
+plot
+#  
+cowplot::save_plot("Figure6.pdf", plot = plot, base_width = 15, base_height = 11)
+
+```
+
+<br>
+
+***  
+
+# R.session Info
+
+```{r Rsession, echo=FALSE}
+
+sessionInfo() #record the R and package versions used
+##############################
+# R version 4.2.3 (2023-03-15 ucrt)
+# Platform: x86_64-w64-mingw32/x64 (64-bit)
+# Running under: Windows 10 x64 (build 19044)
+# 
+# Matrix products: default
+# 
+# locale:
+# [1] LC_COLLATE=English_Australia.utf8  LC_CTYPE=English_Australia.utf8   
+# [3] LC_MONETARY=English_Australia.utf8 LC_NUMERIC=C                      
+# [5] LC_TIME=English_Australia.utf8    
+# 
+# attached base packages:
+# [1] stats     graphics  grDevices utils     datasets  methods   base     
+# 
+# other attached packages:
+# [1] cowplot_1.1.1  ggrepel_0.9.3  ggplot2_3.4.2  reshape2_1.4.4 edgeR_3.40.2   limma_3.54.2  
+# 
+# loaded via a namespace (and not attached):
+#  [1] Rcpp_1.0.10                 locfit_1.5-9.7              lattice_0.20-45            
+#  [4] Rsamtools_2.14.0            Biostrings_2.66.0           digest_0.6.31              
+#  [7] R6_2.5.1                    GenomeInfoDb_1.34.9         plyr_1.8.8                 
+# [10] stats4_4.2.3                Polychrome_1.5.1            evaluate_0.21              
+# [13] pillar_1.11.0               zlibbioc_1.44.0             rlang_1.1.3                
+# [16] rstudioapi_0.14             S4Vectors_0.36.2            Matrix_1.6-5               
+# [19] rmarkdown_2.22              BiocParallel_1.32.5         stringr_1.5.0              
+# [22] RCurl_1.98-1.12             DelayedArray_0.23.2         compiler_4.2.3             
+# [25] rtracklayer_1.58.0          xfun_0.39                   pkgconfig_2.0.3            
+# [28] BiocGenerics_0.44.0         htmltools_0.5.4             tidyselect_1.2.0           
+# [31] SummarizedExperiment_1.28.0 tibble_3.2.1                GenomeInfoDbData_1.2.9     
+# [34] IRanges_2.32.0              codetools_0.2-19            matrixStats_1.0.0          
+# [37] XML_3.99-0.13               crayon_1.5.2                dplyr_1.1.2                
+# [40] withr_2.5.0                 GenomicAlignments_1.34.1    bitops_1.0-7               
+# [43] grid_4.2.3                  gtable_0.3.3                lifecycle_1.0.3            
+# [46] magrittr_2.0.3              scales_1.4.0                cli_3.6.0                  
+# [49] stringi_1.7.12              farver_2.1.1                XVector_0.38.0             
+# [52] scatterplot3d_0.3-43        generics_0.1.3              vctrs_0.6.0                
+# [55] rjson_0.2.21                restfulr_0.0.15             RColorBrewer_1.1-3         
+# [58] tools_4.2.3                 Biobase_2.58.0              glue_1.6.2                 
+# [61] MatrixGenerics_1.10.0       parallel_4.2.3              fastmap_1.1.1              
+# [64] yaml_2.3.7                  colorspace_2.1-0            GenomicRanges_1.50.2       
+# [67] knitr_1.43                  BiocIO_1.8.0               
+##############################
+
+```
+
+***
