@@ -35,14 +35,13 @@ sample.colors.line<-group.colors.line[as.numeric(meta.data$Line)]
 
 ```{r}
 
-fpkms<-edgeR.output.H[, grep("fpkm",colnames(edgeR.output.H))]
-colnames(fpkms)<-gsub("fpkm.","",colnames(fpkms))
-dim(fpkms) #78894    52
-identical(rownames(fpkms), y$genes$Ensembl.114.Gene.ID) #sanity check
+#fpkm<-rpkm(y,normalized.lib.sizes=TRUE,log=FALSE,gene.length=rowMeans(gene.lengths)) 
+dim(fpkm) #78894    52
+identical(rownames(fpkm), y$genes$Ensembl.114.Gene.ID) #sanity check
 #
-rownames(fpkms)<-paste(y$genes$Gene.Name,rownames(fpkms),sep=' | ')
+rownames(fpkm)<-paste(y$genes$Ensembl.114.Gene.Name,rownames(fpkm),sep=' | ')
 #
-nrp1.fpkm<-fpkms[grep('^NRP1',rownames(fpkms)),,drop=F]
+nrp1.fpkm<-fpkm[grep('^NRP1',rownames(fpkm)),,drop=F]
 dim(nrp1.fpkm)
 nrp1.fpkm<-data.frame(t(nrp1.fpkm),check.names=F)
 nrp1.label<-colnames(nrp1.fpkm) #"NRP1 | ENSG00000099250.18"
@@ -64,7 +63,7 @@ AA
 ```
 
 ```{r}
-rm(list=setdiff(ls(),c("nrp1.tpm","AA","nrp1.label","mygtf","level.order.treat","level.order.line","group.colors.treat","group.colors.line"))) #cleanup
+rm(list=setdiff(ls(),c("AA","nrp1.label","mygtf","level.order.treat","level.order.line","group.colors.treat","group.colors.line"))) #cleanup
 ```
 
 
@@ -86,12 +85,12 @@ sample.colors.line<-group.colors.line[as.numeric(meta.data$Line)]
 ```{r}
 
 ### isoform percentages - from RSEM
-dim(isoPcts.H) #387954     52
-identical(rownames(isoPcts.H), y$genes$Ensembl.114.Transcript.ID) #sanity check
+dim(isoPcts) #387954     52
+identical(rownames(isoPcts), y$genes$Ensembl.114.Transcript.ID) #sanity check
 #
-rownames(isoPcts.H)<-paste(y$genes$Transcript.Name,rownames(isoPcts.H),y$genes$Transcript.Type,sep=' | ')
+rownames(isoPcts)<-paste(y$genes$Transcript.Name,rownames(isoPcts),y$genes$Transcript.Type,sep=' | ')
 #
-nrp1.isopct<-isoPcts.H[grep('^NRP1',rownames(isoPcts.H)),,drop=F]
+nrp1.isopct<-isoPcts[grep('^NRP1',rownames(isoPcts)),,drop=F]
 dim(nrp1.isopct) #14
 colSums(nrp1.isopct) #sanity check
 nrp1.isopct<-data.frame(t(nrp1.isopct),check.names=F)
@@ -127,7 +126,7 @@ B
 
 
 ```{r}
-rm(list=setdiff(ls(),c("nrp1.tpm","AA","nrp1.label","nrp1.isopct","B","named.p36","mygtf","level.order.treat","level.order.line","group.colors.treat","group.colors.line"))) #cleanup
+rm(list=setdiff(ls(),c("AA","nrp1.label","nrp1.isopct","B","named.p36","mygtf","level.order.treat","level.order.line","group.colors.treat","group.colors.line"))) #cleanup
 gc()
 #nrp1.label<-"NRP1 | ENSG00000099250.18"
 ```
@@ -233,21 +232,13 @@ C
 dev.new(width=15, height=11, noRStudioGD = T, rescale='fixed')
 #
 #
-plot<-plot_grid(plot_grid(A,B,rel_widths=c(1,1.6),labels=c('a','b')), #A is based on TPM, AA is based on FPKM
+plot<-plot_grid(plot_grid(AA,B,rel_widths=c(1,1.6),labels=c('a','b')), 
                 plot_grid(NULL,C,labels='c',rel_widths=c(0.015,1)),
                 ncol=1, rel_heights=c(1,1.3), 
                 align="h",axis="tb")
 plot
 #  
-cowplot::save_plot("Figure6.pdf", plot = plot, base_width = 15, base_height = 11)
 #
-#
-plot<-plot_grid(plot_grid(AA,B,rel_widths=c(1,1.6),labels=c('a','b')), #A is based on TPM, AA is based on FPKM
-                plot_grid(NULL,C,labels='c',rel_widths=c(0.015,1)),
-                ncol=1, rel_heights=c(1,1.3), 
-                align="h",axis="tb")
-plot
-#  
 cowplot::save_plot("Figure6.pdf", plot = plot, base_width = 15, base_height = 11)
 
 ```
