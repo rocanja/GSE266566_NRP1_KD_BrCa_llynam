@@ -178,10 +178,10 @@ C<-trancriptVis(gtfFile = mygtf, gene = "NRP1", #now it works
              geom_point(aes(x=33185659, y=15.4), size=4, shape=25, fill=group.colors.treat[5], col='white')+ # shNRP1#3
              geom_point(aes(x=33263779, y=15.4), size=4, shape=25, fill=group.colors.treat[6], col='white')+ # shNRP1#5
              #
-             annotate("text", x=33185638+2000, y=16.0, label="siNRP1 #3 (5’-TAACCACATTTCACAAGAA-3’) ... includes NRP1-209", color=group.colors.treat[2], size=3.5, hjust=0) +
-             annotate("text", x=33263779+2000, y=16.0, label="siNRP1 #5 (5’-CAGCCTTGAATGCACTTAT-3’) ... excludes NRP1-213, includes NRP1-207", color=group.colors.treat[3], size=3.5, hjust=0) +
-             annotate("text", x=33185659+2000, y=15.4, label="shNRP1 #3 (5ʹ-AATACTAATGTCATCCACAGC-3ʹ) ... excludes NRP1-209", color=group.colors.treat[5], size=3.5, hjust=0) +
-             annotate("text", x=33263779+2000, y=15.4, label="shNRP1 #5 (5’-CAGCCTTGAATGCACTTAT-3’) ... excludes NRP1-213, includes NRP1-207", color=group.colors.treat[6], size=3.5, hjust=0) +
+             annotate("text", x=33185638+2000, y=16.0, label="siNRP1 #3 (5’-UAACCACAUUUCACAAGAA-3’) ... includes NRP1-209", color=group.colors.treat[2], size=3.5, hjust=0) +
+             annotate("text", x=33263779+2000, y=16.0, label="siNRP1 #5 (5’-CAGCCUUGAAUGCACUUAU-3’) ... excludes NRP1-213, includes NRP1-207", color=group.colors.treat[3], size=3.5, hjust=0) +
+             annotate("text", x=33185659+2000, y=15.4, label="shNRP1 #3 (5ʹ-GCUGUGGAUGACAUUAGUAUU-3ʹ) ... excludes NRP1-209", color=group.colors.treat[5], size=3.5, hjust=0) +
+             annotate("text", x=33263779+2000, y=15.4, label="shNRP1 #5 (5’-CAGCCUUGAAUGCACUUAU-3’) ... excludes NRP1-213, includes NRP1-207", color=group.colors.treat[6], size=3.5, hjust=0) +
              #
              ### Primer mapping sites ###
              geom_vline(xintercept=c(33330723,33180345), col=c('grey70'), linetype='dotted', linewidth=0.2)+
@@ -204,13 +204,12 @@ C
 ### USCS genome browser ... use the Short Sequence Match track
 ####################################################################
 ### si/sh RNA sequencing mapping sites for GRCh38.gencode.v.48
-### note replaced the Us by Ts in the plot to be consistent
 ### NRP1 gene locus: chr10:33177492-33336262 (-)
 ###
 ### siNRP1#3, 5’ UAACCACAUUUCACAAGAA 3’     chr10 start 33,185,638 (-) ... includes NRP1-209 (..3802)
 ### siNRP1#5, 5’ CAGCCUUGAAUGCACUUAU 3’     chr10 start 33,263,779 (-) ... misses NRP1-213 (..5749)
 #
-### shNRP1#3, 5ʹ AATACTAATGTCATCCACAGC 3'   chr10 start 33,185,659 (+) ... misses NRP1-209 (..3802)  
+### shNRP1#3, 5ʹ GCUGUGGAUGACAUUAGUAUU 3'   chr10 start 33,185,659 (-) ... misses NRP1-209 (..3802)  
 ### shNRP1#5, 5’ CAGCCUUGAAUGCACUUAU 3’     chr10 start 33,263,779 (-) ... misses NRP1-213 (..5749)
 ###
 ####################################################################
