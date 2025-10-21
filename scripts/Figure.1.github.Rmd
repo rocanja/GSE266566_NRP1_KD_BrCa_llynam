@@ -91,7 +91,7 @@ dev.new(width=10, height=5, noRStudioGD = T, rescale='fixed')
 #
 plot
 #
-cowplot::save_plot("Figure0.pdf", plot = plot, base_width = 10, base_height = 5)
+cowplot::save_plot("Figure1.pdf", plot = plot, base_width = 10, base_height = 5)
 
 ```
 
